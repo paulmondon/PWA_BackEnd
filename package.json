@@ -24,7 +24,7 @@
     "web-push": "^3.6.6"
   },
   "engines": {
-    "node": "14.x"
+    "node": "18.x"
   }
   
 }
