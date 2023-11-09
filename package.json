@@ -22,9 +22,5 @@
     "passport-jwt": "^4.0.1",
     "socket.io": "^4.7.2",
     "web-push": "^3.6.6"
-  },
-  "engines": {
-    "node": "18.x"
   }
-  
 }
