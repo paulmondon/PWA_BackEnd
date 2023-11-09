@@ -28,6 +28,28 @@ var functions = {
             }
         });
     },
+    getUserbySearch: async function (req, res) {
+        const searchParam = req.params.searchParam; // Assuming the query parameter is named "searchParam"
+
+        try {
+            // Use a regular expression for case-insensitive search
+            const users = await User.find({
+                $or: [
+                    { username: { $regex: new RegExp(searchParam, 'i') } },
+                    { email: { $regex: new RegExp(searchParam, 'i') } }
+                ]
+            });
+
+            if (users.length > 0) {
+                res.json({ success: true, message: 'Users found successfully', users });
+            } else {
+                res.json({ success: false, message: 'No users found' });
+            }
+        } catch (error) {
+            console.error('Error searching for users:', error);
+            res.status(500).json({ success: false, message: 'Internal server error' });
+        }
+    },
     addUser: function (req, res) {
         User.findOne({ username: req.body.username })
             .exec()
@@ -116,38 +138,22 @@ var functions = {
         }
     },
 
-    deleteUser: function (req, res) {
-        User.findByIdAndRemove(req.params.id, function (err) {
-            if (err) {
-                res.json({ success: false, message: err });
-            } else {
+    deleteUser: async function (req, res) {
+        try {
+            const result = await User.findByIdAndRemove(req.params.id);
+            if (result) {
                 res.json({ success: true, message: 'User deleted successfully' });
+            } else {
+                res.json({ success: false, message: 'User not found' });
             }
-        });
+        } catch (error) {
+            console.error('Error deleting user:', error);
+            res.status(500).json({ success: false, message: 'Internal server error' });
+        }
     },
 
+
     // Authentification functions
-    authenticate: function (req, res) {
-        User.findOne({ email: req.body.email }, function (err, user) {
-            if (err) {
-                return res.json({ success: false, message: 'Error while fetching user.' });
-            }
-            if (!user) {
-                return res.json({ success: false, message: "Échec de l'authentification, l'utilisateur n'a pas été trouvé" });
-            }
-            user.comparePassword(req.body.password, function (err, isMatch) {
-                if (err) {
-                    return res.json({ success: false, message: 'Error while comparing passwords.' });
-                }
-                if (isMatch) {
-                    const token = jwtweb.sign({ id: user._id }, '2e3bef7352257d3422fc2e1803c468be04902785c2ce1b3d3b0b2962a12a229798ccb11cb5b1300c5f704e557056557e18c999a6afb49c2ec47f1aabef900a52', { expiresIn: '2h' });
-                    res.json({ success: true, token: token, user: user, message: 'connecté avec succès' })
-                } else {
-                    return res.json({ success: false, message: "Échec de l'authentification : mot de passe erroné" });
-                }
-            });
-        });
-    },
     register: async function (req, res) {
         // Validate the request body
         const errors = validationResult(req);
@@ -165,14 +171,11 @@ var functions = {
                 return res.status(400).json({ success: false, message: 'Username or email already exists' });
             }
 
-            // Hash the password
-            const hashedPassword = await bcrypt.hash(password, 10);
-
             // Create a new user
             const newUser = new User({
                 username,
                 email,
-                password: hashedPassword,
+                password, // Already hashed in the pre-save hook
             });
 
             // Save the user to the database
@@ -184,6 +187,7 @@ var functions = {
             return res.status(500).json({ success: false, message: 'Internal server error' });
         }
     },
+
     login: async function (req, res) {
         // Validate the request body
         const errors = validationResult(req);
@@ -237,110 +241,195 @@ var functions = {
             return res.status(401).json({ success: false, message: 'Invalid token' });
         }
     },
-    createTask: async function (req, res) {
-        const errors = validationResult(req);
-        if (!errors.isEmpty()) {
-            return res.status(400).json({ success: false, errors: errors.array() });
-        }
 
-        // Extract task details from the request body, including the state
-        const { title, description, user, project, state } = req.body;
+    // Project functions
+    getAllProjects: async function (req, res) {
+        try {
+            const projects = await Project.find().populate('users').populate('tasks');
+            res.json({ success: true, projects });
+        } catch (error) {
+            console.error('Error getting projects:', error);
+            res.status(500).json({ success: false, message: 'Internal server error' });
+        }
+    },    
+
+    getProjectById: async function (req, res) {
+        const projectId = req.params.id;
+    
+        try {
+            const project = await Project.findById(projectId).populate('users').populate('tasks');
+            if (!project) {
+                return res.status(404).json({ success: false, message: 'Project not found' });
+            }
+    
+            res.json({ success: true, project });
+        } catch (error) {
+            console.error('Error getting project by ID:', error);
+            res.status(500).json({ success: false, message: 'Internal server error' });
+        }
+    },    
+
+    createProject: async function (req, res) {
+        // Extract project details from the request body
+        const { title, users } = req.body;
+
+        try {
+            // Create a new project
+            const newProject = new Project({
+                title,
+                users,
+            });
+
+            // Save the project to the database
+            const savedProject = await newProject.save();
+            await User.updateMany(
+                { _id: { $in: users } },
+                { $push: { projects: savedProject._id } }
+            );
+
+            res.status(201).json({ success: true, message: 'Project created successfully', project: savedProject });
+        } catch (error) {
+            console.error('Error creating project:', error);
+            res.status(500).json({ success: false, message: 'Internal server error' });
+        }
+    },
+
+    editProject: async function (req, res) {
+        const projectId = req.params.id;
+        const { title, users, tasks } = req.body;
+
+        try {
+            const updatedProject = await Project.findByIdAndUpdate(
+                projectId,
+                { title, users, tasks },
+                { new: true, runValidators: true }
+            );
+
+            if (!updatedProject) {
+                return res.status(404).json({ success: false, message: 'Project not found' });
+            }
+
+            res.json({ success: true, message: 'Project updated successfully', project: updatedProject });
+        } catch (error) {
+            console.error('Error editing project:', error);
+            res.status(500).json({ success: false, message: 'Internal server error' });
+        }
+    },
+
+    deleteProject: async function (req, res) {
+        const projectId = req.params.id;
+
+        try {
+            const deletedProject = await Project.findByIdAndRemove(projectId);
+
+            if (!deletedProject) {
+                return res.status(404).json({ success: false, message: 'Project not found' });
+            }
+
+            res.json({ success: true, message: 'Project deleted successfully' });
+        } catch (error) {
+            console.error('Error deleting project:', error);
+            res.status(500).json({ success: false, message: 'Internal server error' });
+        }
+    },
+
+    // Tasks function
+    getAllTasks: async function (req, res) {
+        try {
+            const tasks = await Task.find().populate('users', 'username email').populate('project');
+            res.json({ success: true, tasks });
+        } catch (error) {
+            console.error('Error getting tasks:', error);
+            res.status(500).json({ success: false, message: 'Internal server error' });
+        }
+    },
+
+    getTaskById: async function (req, res) {
+        const taskId = req.params.id;
+    
+        try {
+            const task = await Task.findById(taskId).populate('users').populate('project');
+            if (!task) {
+                return res.status(404).json({ success: false, message: 'Task not found' });
+            }
+    
+            res.json({ success: true, task });
+        } catch (error) {
+            console.error('Error getting task by ID:', error);
+            res.status(500).json({ success: false, message: 'Internal server error' });
+        }
+    },
+
+    createTask: async function (req, res) {
+        // Extract task details from the request body
+        const { title, description, users, project, state, dueDate } = req.body;
 
         try {
             // Create a new task
             const newTask = new Task({
                 title,
                 description,
-                user,
+                users,
                 project,
                 state,
+                dueDate,
             });
 
             // Save the task to the database
             const savedTask = await newTask.save();
 
-            return res.status(201).json({ success: true, message: 'Task created successfully', task: savedTask });
-        } catch (error) {
-            console.error('Error creating task:', error);
-            return res.status(500).json({ success: false, message: 'Internal server error' });
-        }
-    },
-    getTasksByProject: async function (req, res) {
-        try {
-            const tasks = await Task.find({ project: req.params.projectId });
-            res.json({ success: true, tasks });
-        } catch (error) {
-            console.error('Error fetching tasks:', error);
-            res.status(500).json({ success: false, message: 'Internal server error' });
-        }
-    },
-    getTaskOfProjectById: async function (req, res) {
-        try {
-            const task = await Task.findOne({
-                _id: req.params.taskId,
-                project: req.params.projectId,
-            });
-
-            if (!task) {
-                return res.status(404).json({ success: false, message: 'Task not found' });
-            }
-
-            res.json({ success: true, task });
-        } catch (error) {
-            console.error('Error fetching task:', error);
-            res.status(500).json({ success: false, message: 'Internal server error' });
-        }
-    },
-    updateTaskOfProjectById: async function (req, res) {
-        const errors = validationResult(req);
-        if (!errors.isEmpty()) {
-            return res.status(400).json({ success: false, errors: errors.array() });
-        }
-
-        // Extract task details from the request body, including the state
-        const { title, description, user, project, state } = req.body;
-
-        try {
-            // Update the task in the database based on the task ID
-            const updatedTask = await Task.findByIdAndUpdate(
-                req.params.id,
-                {
-                    title,
-                    description,
-                    user,
-                    project,
-                    state, // Include the state from the request body
-                },
-                { new: true } // Return the updated task
+            // Update the project's tasks array
+            await Project.findByIdAndUpdate(
+                project,
+                { $push: { tasks: savedTask._id } },
+                { new: true, runValidators: true }
             );
 
+            res.status(201).json({ success: true, message: 'Task created successfully', task: savedTask });
+        } catch (error) {
+            console.error('Error creating task:', error);
+            res.status(500).json({ success: false, message: 'Internal server error' });
+        }
+    },
+
+    updateTask: async function (req, res) {
+        const taskId = req.params.id;
+        const { title, description, users, project, state, dueDate } = req.body;
+    
+        try {
+            const updatedTask = await Task.findByIdAndUpdate(
+                taskId,
+                { title, description, users, project, state, dueDate },
+                { new: true, runValidators: true }
+            ).populate('users').populate('project');
+    
             if (!updatedTask) {
                 return res.status(404).json({ success: false, message: 'Task not found' });
             }
-
-            return res.status(200).json({ success: true, message: 'Task updated successfully', task: updatedTask });
+    
+            res.json({ success: true, message: 'Task updated successfully', task: updatedTask });
         } catch (error) {
             console.error('Error updating task:', error);
-            return res.status(500).json({ success: false, message: 'Internal server error' });
+            res.status(500).json({ success: false, message: 'Internal server error' });
         }
     },
-    deleteTaskOfProject: async function (req, res) {
-        try {
-            const deletedTask = await Task.findOneAndDelete({
-                _id: req.params.taskId,
-                project: req.params.projectId,
-            });
 
+    deleteTask: async function (req, res) {
+        const taskId = req.params.id;
+    
+        try {
+            const deletedTask = await Task.findByIdAndRemove(taskId);
+    
             if (!deletedTask) {
                 return res.status(404).json({ success: false, message: 'Task not found' });
             }
-
+    
             res.json({ success: true, message: 'Task deleted successfully' });
         } catch (error) {
             console.error('Error deleting task:', error);
             res.status(500).json({ success: false, message: 'Internal server error' });
         }
-    },
+    }
 
 }
 

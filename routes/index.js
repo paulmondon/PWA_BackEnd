@@ -5,6 +5,7 @@ const router = express.Router()
 // User routes
 router.get('/users', actions.getUsers)
 router.get('/users/:id', actions.getUser)
+router.get('/users/search/:search', actions.getUserbySearch)
 router.post('/users', actions.addUser)
 router.put('/users/:id', actions.updateUser)
 router.delete('/users/:id', actions.deleteUser)
@@ -12,11 +13,18 @@ router.post('/validate-token', actions.validateToken)
 router.post('/login', actions.login)
 router.post('/register', actions.register)
 
+// project routes
+router.get('/projects', actions.getAllProjects);
+router.get('/projects/:id', actions.getProjectById);
+router.post('/projects', actions.createProject)
+router.put('/projects/:id', actions.editProject);
+router.delete('/projects/:id', actions.deleteProject);
+
 // tasks routes
-router.get('/tasks/:projectId', actions.getTasksByProject)
-router.get('/tasks/:projectId/:taskId', actions.getTaskOfProjectById)
-router.post('/tasks/:projectId', actions.createTask)
-router.put('/tasks/:projectId/:taskId', actions.updateTaskOfProjectById)
-router.delete('/tasks/:projectId/:taskId', actions.deleteTaskOfProject)
+router.get('/tasks', actions.getAllTasks);
+router.get('/tasks/:id', actions.getTaskById);
+router.post('/tasks', actions.createTask);
+router.put('/tasks/:id', actions.updateTask);
+router.delete('/tasks/:id', actions.deleteTask);
 
 module.exports = router
