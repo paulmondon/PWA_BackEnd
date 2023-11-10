@@ -25,14 +25,24 @@ var functions = {
                 res.json({ success: false, message: err });
             });
     },
-    getUser: function (req, res) {
-        User.findById(req.params.id, function (err, user) {
-            if (err) {
-                res.json({ success: false, message: err });
-            } else {
-                res.json({ success: true, message: user });
+    getUser: async function (req, res) {
+        const userId = req.params.id;
+    
+        try {
+            // Find the user by ID
+            const user = await User.findById(userId);
+            if (!user) {
+                return res.json({ success: false, message: 'User not found' });
             }
-        });
+    
+            // Omit the password field before sending the user data in the response
+            const { password, ...userDataWithoutPassword } = user.toObject();
+    
+            return res.json({ success: true, user: userDataWithoutPassword });
+        } catch (error) {
+            console.error('Error getting user by ID:', error);
+            return res.json({ success: false, message: 'Internal server error' });
+        }
     },
     getUserbySearch: async function (req, res) {
         const searchParam = req.params.searchParam; // Assuming the query parameter is named "searchParam"
