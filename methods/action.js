@@ -160,33 +160,39 @@ var functions = {
         if (!errors.isEmpty()) {
             return res.json({ success: false, errors: errors.array() });
         }
-
+    
         // Extract user details from the request body
         const { username, email, password } = req.body;
-
+    
         try {
-            // Check if the username and email are unique
-            const existingUser = await User.findOne({ $or: [{ username }, { email }] });
-            if (existingUser) {
-                return res.json({ success: false, message: 'Username or email already exists' });
+            // Check if the username already exists
+            const existingUsername = await User.findOne({ username });
+            if (existingUsername) {
+                return res.json({ success: false, message: 'Username already exists' });
             }
-
+    
+            // Check if the email already exists
+            const existingEmail = await User.findOne({ email });
+            if (existingEmail) {
+                return res.json({ success: false, message: 'Email already exists' });
+            }
+    
             // Create a new user
             const newUser = new User({
                 username,
                 email,
                 password, // Already hashed in the pre-save hook
             });
-
+    
             // Save the user to the database
             const savedUser = await newUser.save();
-
+    
             return res.json({ success: true, message: 'User registered successfully', user: savedUser });
         } catch (error) {
             console.error('Error registering user:', error);
             return res.json({ success: false, message: 'Internal server error' });
         }
-    },
+    },    
 
     login: async function (req, res) {
         // Validate the request body
