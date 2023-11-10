@@ -7,6 +7,12 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const { validationResult } = require('express-validator');
 
+const generateToken = (userId) => {
+    const secretKey = process.env.JWT_SECRET || 'default-secret-key';
+    const token = jwt.sign({ userId }, secretKey, { expiresIn: '1h' });
+    return token;
+};
+
 var functions = {
     // User functions
     getUsers: function (req, res) {
@@ -160,10 +166,10 @@ var functions = {
         if (!errors.isEmpty()) {
             return res.json({ success: false, errors: errors.array() });
         }
-    
+
         // Extract user details from the request body
-        const { username, email, password,confirmPassword } = req.body;
-    
+        const { username, email, password, confirmPassword } = req.body;
+
         try {
 
             if (password !== confirmPassword) {
@@ -174,29 +180,29 @@ var functions = {
             if (existingUsername) {
                 return res.json({ success: false, message: 'Username already exists' });
             }
-    
+
             // Check if the email already exists
             const existingEmail = await User.findOne({ email });
             if (existingEmail) {
                 return res.json({ success: false, message: 'Email already exists' });
             }
-    
+
             // Create a new user
             const newUser = new User({
                 username,
                 email,
                 password, // Already hashed in the pre-save hook
             });
-    
+
             // Save the user to the database
             const savedUser = await newUser.save();
-    
+
             return res.json({ success: true, message: 'User registered successfully', user: savedUser });
         } catch (error) {
             console.error('Error registering user:', error);
             return res.json({ success: false, message: 'Internal server error' });
         }
-    },    
+    },
 
     login: async function (req, res) {
         // Validate the request body
@@ -222,7 +228,7 @@ var functions = {
             }
 
             // Generate a JWT token
-            const token = jwt.sign({ userId: user._id }, 'your-secret-key', { expiresIn: '1h' });
+            const token = generateToken(user._id);
 
             return res.json({ success: true, token, user: { username: user.username, email: user.email } });
         } catch (error) {
@@ -230,25 +236,41 @@ var functions = {
             return res.json({ success: false, message: 'Internal server error' });
         }
     },
-    validateToken: function (req, res) {
+    protectedRoute: (req, res) => {
+        // Your protected route logic here
+        // If the request reaches this point, it means the token is valid
+        return res.json({ success: true, message: 'Protected route accessed successfully' });
+    },
+
+    validateToken: (req, res) => {
         // Validate the request body
         const errors = validationResult(req);
         if (!errors.isEmpty()) {
             return res.json({ success: false, errors: errors.array() });
         }
 
-        // Extract the token from the request body
-        const { token } = req.body;
+        // Extract the token from the request headers
+        const token = req.headers.authorization?.split(' ')[1];
 
         try {
             // Verify the token
-            const decodedToken = jwt.verify(token, 'CQE!q??eMsrtRgFL9s;{ng8/CkC?OK');
+            const decodedToken = jwt.verify(token, process.env.JWT_SECRET);
 
             // Respond with the decoded token
             return res.json({ success: true, user: decodedToken });
         } catch (error) {
             console.error('Error validating token:', error);
-            return res.json({ success: false, message: 'Invalid token' });
+
+            if (error.name === 'TokenExpiredError') {
+                return res.json({ success: false, message: 'Token expired' });
+            }
+
+            if (error.name === 'JsonWebTokenError') {
+                return res.json({ success: false, message: 'Invalid token' });
+            }
+
+            // Handle other errors as needed
+            return res.json({ success: false, message: 'Unexpected error during token validation' });
         }
     },
 
@@ -261,23 +283,23 @@ var functions = {
             console.error('Error getting projects:', error);
             res.json({ success: false, message: 'Internal server error' });
         }
-    },    
+    },
 
     getProjectById: async function (req, res) {
         const projectId = req.params.id;
-    
+
         try {
             const project = await Project.findById(projectId).populate('users').populate('tasks');
             if (!project) {
                 return res.json({ success: false, message: 'Project not found' });
             }
-    
+
             res.json({ success: true, project });
         } catch (error) {
             console.error('Error getting project by ID:', error);
             res.json({ success: false, message: 'Internal server error' });
         }
-    },    
+    },
 
     createProject: async function (req, res) {
         // Extract project details from the request body
@@ -356,13 +378,13 @@ var functions = {
 
     getTaskById: async function (req, res) {
         const taskId = req.params.id;
-    
+
         try {
             const task = await Task.findById(taskId).populate('users').populate('project');
             if (!task) {
                 return res.json({ success: false, message: 'Task not found' });
             }
-    
+
             res.json({ success: true, task });
         } catch (error) {
             console.error('Error getting task by ID:', error);
@@ -405,18 +427,18 @@ var functions = {
     updateTask: async function (req, res) {
         const taskId = req.params.id;
         const { title, description, users, project, state, dueDate } = req.body;
-    
+
         try {
             const updatedTask = await Task.findByIdAndUpdate(
                 taskId,
                 { title, description, users, project, state, dueDate },
                 { new: true, runValidators: true }
             ).populate('users').populate('project');
-    
+
             if (!updatedTask) {
                 return res.json({ success: false, message: 'Task not found' });
             }
-    
+
             res.json({ success: true, message: 'Task updated successfully', task: updatedTask });
         } catch (error) {
             console.error('Error updating task:', error);
@@ -426,14 +448,14 @@ var functions = {
 
     deleteTask: async function (req, res) {
         const taskId = req.params.id;
-    
+
         try {
             const deletedTask = await Task.findByIdAndRemove(taskId);
-    
+
             if (!deletedTask) {
                 return res.json({ success: false, message: 'Task not found' });
             }
-    
+
             res.json({ success: true, message: 'Task deleted successfully' });
         } catch (error) {
             console.error('Error deleting task:', error);

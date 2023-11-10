@@ -3,6 +3,7 @@ const actions = require('../methods/action')
 const router = express.Router()
 
 // User routes
+router.get('/protected', actions.validateToken, actions.protectedRoute);
 router.get('/users', actions.getUsers)
 router.get('/users/:id', actions.getUser)
 router.get('/users/search/:search', actions.getUserbySearch)
