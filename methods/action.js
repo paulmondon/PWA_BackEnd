@@ -82,65 +82,39 @@ var functions = {
             });
     },
     updateUser: function (req, res) {
-        if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
-            res.json({ success: false, message: 'Invalid ID' });
-            return;
-        }
-        const modifiedPassword = req.body.password;
-        if (modifiedPassword) {
-            bcrypt.genSalt(10, (err, salt) => {
-                if (err) {
-                    res.json({ success: false, message: err });
-                } else {
-                    bcrypt.hash(modifiedPassword, salt, (err, hash) => {
-                        if (err) {
-                            res.json({ success: false, message: err });
-                        } else {
-                            req.body.password = hash;
-                            User.findByIdAndUpdate(req.params.id, req.body, { new: true }, function (err, updatedUser) {
-                                if (err) {
-                                    res.json({ success: false, message: err });
-                                } else {
-                                    res.json({ success: true, message: updatedUser });
-                                }
-                            });
-                        }
-                    });
-                }
-            });
-        } else {
-            const { appointment, discussions, quizz, messages, ...rest } = req.body;
-            const update = { $push: {} };
-            if (appointment) {
-                update.$push.appointment = appointment;
+        const userId = req.params.id;
+        const { username, email, newPassword, notification } = req.body;
+    
+        try {
+            // Find the user by ID
+            const user = User.findById(userId);
+            if (!user) {
+                return res.json({ success: false, message: 'User not found' });
             }
-            if (discussions) {
-                update.$push.discussions = discussions;
+    
+            // Update user fields if provided
+            if (username) {
+                user.username = username;
             }
-            if (quizz) {
-                update.$push.quizz = quizz;
+            if (email) {
+                user.email = email;
             }
-            if (messages) {
-                update.$push.messages = messages;
+            if (notification) {
+                user.notification = notification;
             }
-            if (Object.keys(update.$push).length === 0) {
-                // if none of the arrays were updated, just update the rest of the fields
-                User.findByIdAndUpdate(req.params.id, rest, { new: true }, function (err, updatedUser) {
-                    if (err) {
-                        res.json({ success: false, message: err });
-                    } else {
-                        res.json({ success: true, message: updatedUser });
-                    }
-                });
-            } else {
-                User.findByIdAndUpdate(req.params.id, update, { new: true }, function (err, updatedUser) {
-                    if (err) {
-                        res.json({ success: false, message: err });
-                    } else {
-                        res.json({ success: true, message: updatedUser });
-                    }
-                });
+            if (newPassword) {
+                // Hash the new password before saving
+                const hashedPassword = bcrypt.hash(newPassword, 10);
+                user.password = hashedPassword;
             }
+    
+            // Save the updated user to the database
+            const updatedUser = user.save();
+    
+            return res.json({ success: true, message: 'User updated successfully', user: updatedUser });
+        } catch (error) {
+            console.error('Error updating user:', error);
+            return res.json({ success: false, message: 'Internal server error' });
         }
     },
 
