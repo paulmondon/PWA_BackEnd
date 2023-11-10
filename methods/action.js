@@ -162,9 +162,13 @@ var functions = {
         }
     
         // Extract user details from the request body
-        const { username, email, password } = req.body;
+        const { username, email, password,confirmPassword } = req.body;
     
         try {
+
+            if (password !== confirmPassword) {
+                return res.json({ success: false, message: 'Password and confirmPassword do not match' });
+            }
             // Check if the username already exists
             const existingUsername = await User.findOne({ username });
             if (existingUsername) {
