@@ -230,7 +230,7 @@ var functions = {
             // Generate a JWT token
             const token = generateToken(user._id);
 
-            return res.json({ success: true, token, user: { username: user.username, email: user.email } });
+            return res.json({ success: true, token, user: user });
         } catch (error) {
             console.error('Error logging in user:', error);
             return res.json({ success: false, message: 'Internal server error' });
