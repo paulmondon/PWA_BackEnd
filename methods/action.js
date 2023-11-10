@@ -212,13 +212,13 @@ var functions = {
             // Check if the user exists
             const user = await User.findOne({ email });
             if (!user) {
-                return res.json({ success: false, message: 'Invalid email or password' });
+                return res.json({ success: false, message: 'Invalid email' });
             }
 
             // Check if the password is correct
             const isPasswordMatch = await bcrypt.compare(password, user.password);
             if (!isPasswordMatch) {
-                return res.json({ success: false, message: 'Invalid email or password' });
+                return res.json({ success: false, message: 'Invalid password' });
             }
 
             // Generate a JWT token
