@@ -83,7 +83,7 @@ var functions = {
     },
     updateUser: function (req, res) {
         const userId = req.params.id;
-        const { username, email, newPassword, notification } = req.body;
+        const { username, email, newPassword, confirmPassword, notification } = req.body;
     
         try {
             // Find the user by ID
@@ -103,6 +103,9 @@ var functions = {
                 user.notification = notification;
             }
             if (newPassword) {
+                if (password !== confirmPassword) {
+                    return res.json({ success: false, message: 'Password and confirmPassword do not match' });
+                }
                 // Hash the new password before saving
                 const hashedPassword = bcrypt.hash(newPassword, 10);
                 user.password = hashedPassword;
