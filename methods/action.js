@@ -81,13 +81,13 @@ var functions = {
                 res.json({ success: false, message: err });
             });
     },
-    updateUser: function (req, res) {
+    updateUser: async function (req, res) {
         const userId = req.params.id;
         const { username, email, newPassword, confirmPassword, notification } = req.body;
     
         try {
             // Find the user by ID
-            const user = User.findById(userId);
+            const user = await User.findById(userId);
             if (!user) {
                 return res.json({ success: false, message: 'User not found' });
             }
@@ -112,7 +112,7 @@ var functions = {
             }
     
             // Save the updated user to the database
-            const updatedUser = user.save();
+            const updatedUser = await user.save();
     
             return res.json({ success: true, message: 'User updated successfully', user: updatedUser });
         } catch (error) {
