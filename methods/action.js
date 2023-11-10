@@ -158,7 +158,7 @@ var functions = {
         // Validate the request body
         const errors = validationResult(req);
         if (!errors.isEmpty()) {
-            return res.status(400).json({ success: false, errors: errors.array() });
+            return res.json({ success: false, errors: errors.array() });
         }
 
         // Extract user details from the request body
@@ -168,7 +168,7 @@ var functions = {
             // Check if the username and email are unique
             const existingUser = await User.findOne({ $or: [{ username }, { email }] });
             if (existingUser) {
-                return res.status(400).json({ success: false, message: 'Username or email already exists' });
+                return res.json({ success: false, message: 'Username or email already exists' });
             }
 
             // Create a new user
@@ -181,10 +181,10 @@ var functions = {
             // Save the user to the database
             const savedUser = await newUser.save();
 
-            return res.status(201).json({ success: true, message: 'User registered successfully', user: savedUser });
+            return res.json({ success: true, message: 'User registered successfully', user: savedUser });
         } catch (error) {
             console.error('Error registering user:', error);
-            return res.status(500).json({ success: false, message: 'Internal server error' });
+            return res.json({ success: false, message: 'Internal server error' });
         }
     },
 
