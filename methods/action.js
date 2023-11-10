@@ -117,7 +117,7 @@ var functions = {
                     return res.json({ success: false, message: 'Password and confirmPassword do not match' });
                 }
                 // Hash the new password before saving
-                const hashedPassword = bcrypt.hash(newPassword, 10);
+                const hashedPassword = await bcrypt.hash(newPassword, 10);
                 user.password = hashedPassword;
             }
     
