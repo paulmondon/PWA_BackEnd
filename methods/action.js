@@ -250,7 +250,7 @@ var functions = {
         }
 
         // Extract the token from the request headers
-        const token = req.headers.authorization?.split(' ')[1];
+        const token = req.body.token;
 
         try {
             // Verify the token
