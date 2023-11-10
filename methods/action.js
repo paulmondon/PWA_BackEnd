@@ -47,7 +47,7 @@ var functions = {
             }
         } catch (error) {
             console.error('Error searching for users:', error);
-            res.status(500).json({ success: false, message: 'Internal server error' });
+            res.json({ success: false, message: 'Internal server error' });
         }
     },
     addUser: function (req, res) {
@@ -148,7 +148,7 @@ var functions = {
             }
         } catch (error) {
             console.error('Error deleting user:', error);
-            res.status(500).json({ success: false, message: 'Internal server error' });
+            res.json({ success: false, message: 'Internal server error' });
         }
     },
 
@@ -192,7 +192,7 @@ var functions = {
         // Validate the request body
         const errors = validationResult(req);
         if (!errors.isEmpty()) {
-            return res.status(400).json({ success: false, errors: errors.array() });
+            return resjson({ success: false, errors: errors.array() });
         }
 
         // Extract user details from the request body
@@ -202,29 +202,29 @@ var functions = {
             // Check if the user exists
             const user = await User.findOne({ email });
             if (!user) {
-                return res.status(401).json({ success: false, message: 'Invalid email or password' });
+                return res.json({ success: false, message: 'Invalid email or password' });
             }
 
             // Check if the password is correct
             const isPasswordMatch = await bcrypt.compare(password, user.password);
             if (!isPasswordMatch) {
-                return res.status(401).json({ success: false, message: 'Invalid email or password' });
+                return res.json({ success: false, message: 'Invalid email or password' });
             }
 
             // Generate a JWT token
             const token = jwt.sign({ userId: user._id }, 'your-secret-key', { expiresIn: '1h' });
 
-            return res.status(200).json({ success: true, token, user: { username: user.username, email: user.email } });
+            return res.json({ success: true, token, user: { username: user.username, email: user.email } });
         } catch (error) {
             console.error('Error logging in user:', error);
-            return res.status(500).json({ success: false, message: 'Internal server error' });
+            return res.json({ success: false, message: 'Internal server error' });
         }
     },
     validateToken: function (req, res) {
         // Validate the request body
         const errors = validationResult(req);
         if (!errors.isEmpty()) {
-            return res.status(400).json({ success: false, errors: errors.array() });
+            return res.json({ success: false, errors: errors.array() });
         }
 
         // Extract the token from the request body
@@ -235,10 +235,10 @@ var functions = {
             const decodedToken = jwt.verify(token, 'CQE!q??eMsrtRgFL9s;{ng8/CkC?OK');
 
             // Respond with the decoded token
-            return res.status(200).json({ success: true, user: decodedToken });
+            return res.json({ success: true, user: decodedToken });
         } catch (error) {
             console.error('Error validating token:', error);
-            return res.status(401).json({ success: false, message: 'Invalid token' });
+            return res.json({ success: false, message: 'Invalid token' });
         }
     },
 
@@ -249,7 +249,7 @@ var functions = {
             res.json({ success: true, projects });
         } catch (error) {
             console.error('Error getting projects:', error);
-            res.status(500).json({ success: false, message: 'Internal server error' });
+            res.json({ success: false, message: 'Internal server error' });
         }
     },    
 
@@ -259,13 +259,13 @@ var functions = {
         try {
             const project = await Project.findById(projectId).populate('users').populate('tasks');
             if (!project) {
-                return res.status(404).json({ success: false, message: 'Project not found' });
+                return res.json({ success: false, message: 'Project not found' });
             }
     
             res.json({ success: true, project });
         } catch (error) {
             console.error('Error getting project by ID:', error);
-            res.status(500).json({ success: false, message: 'Internal server error' });
+            res.json({ success: false, message: 'Internal server error' });
         }
     },    
 
@@ -287,10 +287,10 @@ var functions = {
                 { $push: { projects: savedProject._id } }
             );
 
-            res.status(201).json({ success: true, message: 'Project created successfully', project: savedProject });
+            res.json({ success: true, message: 'Project created successfully', project: savedProject });
         } catch (error) {
             console.error('Error creating project:', error);
-            res.status(500).json({ success: false, message: 'Internal server error' });
+            res.json({ success: false, message: 'Internal server error' });
         }
     },
 
@@ -306,13 +306,13 @@ var functions = {
             );
 
             if (!updatedProject) {
-                return res.status(404).json({ success: false, message: 'Project not found' });
+                return res.json({ success: false, message: 'Project not found' });
             }
 
             res.json({ success: true, message: 'Project updated successfully', project: updatedProject });
         } catch (error) {
             console.error('Error editing project:', error);
-            res.status(500).json({ success: false, message: 'Internal server error' });
+            res.json({ success: false, message: 'Internal server error' });
         }
     },
 
@@ -323,13 +323,13 @@ var functions = {
             const deletedProject = await Project.findByIdAndRemove(projectId);
 
             if (!deletedProject) {
-                return res.status(404).json({ success: false, message: 'Project not found' });
+                return res.json({ success: false, message: 'Project not found' });
             }
 
             res.json({ success: true, message: 'Project deleted successfully' });
         } catch (error) {
             console.error('Error deleting project:', error);
-            res.status(500).json({ success: false, message: 'Internal server error' });
+            res.json({ success: false, message: 'Internal server error' });
         }
     },
 
@@ -340,7 +340,7 @@ var functions = {
             res.json({ success: true, tasks });
         } catch (error) {
             console.error('Error getting tasks:', error);
-            res.status(500).json({ success: false, message: 'Internal server error' });
+            res.json({ success: false, message: 'Internal server error' });
         }
     },
 
@@ -350,13 +350,13 @@ var functions = {
         try {
             const task = await Task.findById(taskId).populate('users').populate('project');
             if (!task) {
-                return res.status(404).json({ success: false, message: 'Task not found' });
+                return res.json({ success: false, message: 'Task not found' });
             }
     
             res.json({ success: true, task });
         } catch (error) {
             console.error('Error getting task by ID:', error);
-            res.status(500).json({ success: false, message: 'Internal server error' });
+            res.json({ success: false, message: 'Internal server error' });
         }
     },
 
@@ -385,10 +385,10 @@ var functions = {
                 { new: true, runValidators: true }
             );
 
-            res.status(201).json({ success: true, message: 'Task created successfully', task: savedTask });
+            res.json({ success: true, message: 'Task created successfully', task: savedTask });
         } catch (error) {
             console.error('Error creating task:', error);
-            res.status(500).json({ success: false, message: 'Internal server error' });
+            res.json({ success: false, message: 'Internal server error' });
         }
     },
 
@@ -404,13 +404,13 @@ var functions = {
             ).populate('users').populate('project');
     
             if (!updatedTask) {
-                return res.status(404).json({ success: false, message: 'Task not found' });
+                return res.json({ success: false, message: 'Task not found' });
             }
     
             res.json({ success: true, message: 'Task updated successfully', task: updatedTask });
         } catch (error) {
             console.error('Error updating task:', error);
-            res.status(500).json({ success: false, message: 'Internal server error' });
+            res.json({ success: false, message: 'Internal server error' });
         }
     },
 
@@ -421,13 +421,13 @@ var functions = {
             const deletedTask = await Task.findByIdAndRemove(taskId);
     
             if (!deletedTask) {
-                return res.status(404).json({ success: false, message: 'Task not found' });
+                return res.json({ success: false, message: 'Task not found' });
             }
     
             res.json({ success: true, message: 'Task deleted successfully' });
         } catch (error) {
             console.error('Error deleting task:', error);
-            res.status(500).json({ success: false, message: 'Internal server error' });
+            res.json({ success: false, message: 'Internal server error' });
         }
     }
 
