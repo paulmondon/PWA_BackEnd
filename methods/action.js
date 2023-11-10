@@ -27,17 +27,17 @@ var functions = {
     },
     getUser: async function (req, res) {
         const userId = req.params.id;
-    
+
         try {
             // Find the user by ID
             const user = await User.findById(userId);
             if (!user) {
                 return res.json({ success: false, message: 'User not found' });
             }
-    
+
             // Omit the password field before sending the user data in the response
             const { password, ...userDataWithoutPassword } = user.toObject();
-    
+
             return res.json({ success: true, user: userDataWithoutPassword });
         } catch (error) {
             console.error('Error getting user by ID:', error);
@@ -94,14 +94,14 @@ var functions = {
     updateUser: async function (req, res) {
         const userId = req.params.id;
         const { username, email, newPassword, confirmPassword, notification } = req.body;
-    
+
         try {
             // Find the user by ID
             const user = await User.findById(userId);
             if (!user) {
                 return res.json({ success: false, message: 'User not found' });
             }
-    
+
             // Update user fields if provided
             if (username) {
                 user.username = username;
@@ -117,13 +117,16 @@ var functions = {
                     return res.json({ success: false, message: 'Password and confirmPassword do not match' });
                 }
                 // Hash the new password before saving
-                const hashedPassword = await bcrypt.hash(newPassword, 10);
+                const salt = await bcrypt.genSalt(10);
+
+                // Hash the new password with the generated salt
+                const hashedPassword = await bcrypt.hash(newPassword, salt);
                 user.password = hashedPassword;
             }
-    
+
             // Save the updated user to the database
             const updatedUser = await user.save();
-    
+
             return res.json({ success: true, message: 'User updated successfully', user: updatedUser });
         } catch (error) {
             console.error('Error updating user:', error);
