@@ -113,7 +113,7 @@ var functions = {
                 user.notification = notification;
             }
             if (newPassword) {
-                if (password !== confirmPassword) {
+                if (newPassword !== confirmPassword) {
                     return res.json({ success: false, message: 'Password and confirmPassword do not match' });
                 }
                 // Hash the new password before saving
