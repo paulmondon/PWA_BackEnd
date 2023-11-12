@@ -128,7 +128,7 @@ var functions = {
                     user.password = hashedPassword;
                 } catch (hashError) {
                     console.error('Error hashing password:', hashError);
-                    return res.json({ success: false, message: 'Error hashing password' });
+                    return res.json({ success: false, message: 'Error hashing password', error: hashError.message });
                 }
             }
     
