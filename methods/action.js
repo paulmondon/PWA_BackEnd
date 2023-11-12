@@ -127,7 +127,7 @@ var functions = {
             // Save the updated user to the database
             const updatedUser = await user.save();
 
-            return res.json({ success: true, message: 'User updated successfully', user: updatedUser, new: newPassword });
+            return res.json({ success: true, message: 'User updated successfully', user: updatedUser });
         } catch (error) {
             console.error('Error updating user:', error);
             return res.json({ success: false, message: 'Internal server error' });
