@@ -116,12 +116,25 @@ var functions = {
                 if (newPassword !== confirmPassword) {
                     return res.json({ success: false, message: 'Password and confirmPassword do not match' });
                 }
+                bcrypt.genSalt(10, (err, salt) => {
+                    if (err) {
+                        res.json({ success: false, message: err });
+                    } else {
+                        bcrypt.hash(modifiedPassword, salt, (err, hash) => {
+                            if (err) {
+                                res.json({ success: false, message: err });
+                            } else {
+                                user.password = hash;
+                            }
+                        });
+                    }
+                });
                 // Hash the new password before saving
-                const salt = await bcrypt.genSalt(10);
+                // const salt = await bcrypt.genSalt(10);
 
-                // Hash the new password with the generated salt
-                const hashedPassword = await bcrypt.hash(newPassword, salt);
-                user.password = hashedPassword;
+                // // Hash the new password with the generated salt
+                // const hashedPassword = await bcrypt.hash(newPassword, salt);
+                // user.password = hashedPassword;
             }
 
             // Save the updated user to the database
