@@ -94,14 +94,14 @@ var functions = {
     updateUser: async function (req, res) {
         const userId = req.params.id;
         const { username, email, newPassword, confirmPassword, notification } = req.body;
-    
+
         try {
             // Find the user by ID
             const user = await User.findById(userId);
             if (!user) {
                 return res.json({ success: false, message: 'User not found' });
             }
-    
+
             // Update user fields if provided
             if (username) {
                 user.username = username;
@@ -116,25 +116,17 @@ var functions = {
                 if (newPassword !== confirmPassword) {
                     return res.json({ success: false, message: 'Password and confirmPassword do not match' });
                 }
-    
-                try {
-                    // Generate a salt
-                    const salt = await bcrypt.genSalt(10);
-    
-                    // Hash the new password with the generated salt
-                    const hashedPassword = await bcrypt.hash(newPassword, salt);
-    
-                    // Set the user's password to the hashed value
-                    user.password = hashedPassword;
-                } catch (hashError) {
-                    console.error('Error hashing password:', hashError);
-                    return res.json({ success: false, message: 'Error hashing password', error: hashError.message });
-                }
+                // Hash the new password before saving
+                const salt = await bcrypt.genSalt(10);
+
+                // Hash the new password with the generated salt
+                const hashedPassword = await bcrypt.hash(newPassword, salt);
+                user.password = hashedPassword;
             }
-    
+
             // Save the updated user to the database
             const updatedUser = await user.save();
-    
+
             return res.json({ success: true, message: 'User updated successfully', user: updatedUser });
         } catch (error) {
             console.error('Error updating user:', error);
@@ -220,7 +212,7 @@ var functions = {
             }
 
             // Check if the password is correct
-            const isPasswordMatch = await bcrypt.compare(password, user.password);
+            const isPasswordMatch = await user.comparePassword(password);
             if (!isPasswordMatch) {
                 return res.json({ success: false, message: 'Invalid password' });
             }
