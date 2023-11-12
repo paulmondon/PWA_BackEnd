@@ -214,7 +214,7 @@ var functions = {
             // Check if the password is correct
             const isPasswordMatch = await user.comparePassword(password);
             if (!isPasswordMatch) {
-                return res.json({ success: false, message: 'Invalid password' });
+                return res.json({ success: false, message: 'Invalid password', match: isPasswordMatch });
             }
 
             // Generate a JWT token
