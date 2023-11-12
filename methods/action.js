@@ -127,7 +127,7 @@ var functions = {
             // Save the updated user to the database
             const updatedUser = await user.save();
 
-            return res.json({ success: true, message: 'User updated successfully', user: updatedUser });
+            return res.json({ success: true, message: 'User updated successfully', user: updatedUser, new: newPassword });
         } catch (error) {
             console.error('Error updating user:', error);
             return res.json({ success: false, message: 'Internal server error' });
@@ -214,7 +214,7 @@ var functions = {
             // Check if the password is correct
             const isPasswordMatch = await bcrypt.compare(password, user.password);
             if (!isPasswordMatch) {
-                return res.json({ success: false, message: 'Invalid password', hash: user.password, password: password, user: user});
+                return res.json({ success: false, message: 'Invalid password'});
             }
 
             // Generate a JWT token
