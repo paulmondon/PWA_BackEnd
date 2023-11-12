@@ -212,7 +212,7 @@ var functions = {
             }
 
             // Check if the password is correct
-            user.comparePassword(req.body.password, async function (err, isMatch) {
+            user.comparePassword(password, async function (err, isMatch) {
                 if (err) {
                     return res.json({ success: false, message: 'Error while comparing passwords.' });
                 }
