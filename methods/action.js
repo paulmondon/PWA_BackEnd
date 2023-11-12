@@ -119,10 +119,10 @@ var functions = {
     
                 try {
                     // Generate a salt
-                    const salt = await genSalt(10);
+                    const salt = await bcrypt.genSalt(10);
     
                     // Hash the new password with the generated salt
-                    const hashedPassword = await hash(newPassword, salt);
+                    const hashedPassword = await bcrypt.hash(newPassword, salt);
     
                     // Set the user's password to the hashed value
                     user.password = hashedPassword;
