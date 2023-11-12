@@ -212,14 +212,10 @@ var functions = {
             }
 
             // Check if the password is correct
-            user.comparePassword(password, async function (err, isMatch) {
-                if (err) {
-                    return res.json({ success: false, message: 'Error while comparing passwords.' });
-                }
-                if (!isMatch) {
-                    return res.json({ success: false, message: 'Invalid password', match: isPasswordMatch });
-                }
-            })
+            const isPasswordMatch = await bcrypt.compare(password, user.password);
+            if (!isPasswordMatch) {
+                return res.json({ success: false, message: 'Invalid password' });
+            }
 
             // Generate a JWT token
             const token = generateToken(user._id);
