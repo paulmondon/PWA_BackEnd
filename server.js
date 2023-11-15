@@ -43,16 +43,6 @@ io.on('connection', (socket) => {
     // ... other event handlers
 });
 
-app.post('/tasks', (req, res) => {
-    // Your logic to save the task to the database
-    const projectId = req.body.projectId;
-    const taskId = '123'; // Replace with the actual task ID
-
-    io.to(projectId).emit('taskAdded', taskId);
-
-    res.status(201).json({ message: 'Task created successfully' });
-});
-
 app.post('/souscrire', (req, res) => {
     webpush.setVapidDetails(
         'mailto:nico@gmail.com',

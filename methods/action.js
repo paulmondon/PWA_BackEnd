@@ -25,6 +25,18 @@ var functions = {
                 res.json({ success: false, message: err });
             });
     },
+    getUsersExcept: function (req, res) {
+        const userIdToExclude = req.params.id;
+    
+        User.find({ _id: { $ne: userIdToExclude } })
+            .exec()
+            .then(users => {
+                res.json({ success: true, message: users });
+            })
+            .catch(err => {
+                res.json({ success: false, message: err });
+            });
+    },    
     getUser: async function (req, res) {
         const userId = req.params.id;
 
