@@ -500,7 +500,6 @@ var functions = {
             'jfp4RXbjyCSbvb6d8elhfq0BzmaUQSLf-hCrL0NMRCA'
           );
           // Save the subscription details to your database or perform other necessary actions
-          console.log('Received subscription:', subscription);
       
           // Optionally, you can store the subscription in your database for future use
           // Example: saveSubscriptionToDatabase(subscription);
@@ -509,6 +508,7 @@ var functions = {
             notification: {
               title: 'Subscription Successful',
               body: 'You have successfully subscribed to push notifications.',
+              icon: 'logo512x512.png',
             },
           };
       
