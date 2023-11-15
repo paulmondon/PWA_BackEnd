@@ -22,8 +22,8 @@ const taskSchema = new Schema({
     },
     state: {
         type: String,
-        enum: ['started', 'progress', 'finished'],
-        default: 'started',
+        enum: [0, 1, 2],
+        default: 0,
     },
     createdAt: {
         type: Date,
