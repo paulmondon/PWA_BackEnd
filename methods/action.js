@@ -493,7 +493,11 @@ var functions = {
     souscrire: async function (req, res) {
         try {
           const subscription = req.body.subscription;
-      
+          webpush.setVapidDetails(
+            'mailto:nico@gmail.com',
+            'BOUfXxr7xEFzcjeXmvOFvbdsXosthzgbO5pyAUTWJ76XQ2fOLP0iau6ptvpdNyOVf-inaM3JIr9dXIE5f3oV3uE',
+            'jfp4RXbjyCSbvb6d8elhfq0BzmaUQSLf-hCrL0NMRCA'
+          );
           // Save the subscription details to your database or perform other necessary actions
           console.log('Received subscription:', subscription);
       
