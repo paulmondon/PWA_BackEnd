@@ -31,6 +31,7 @@ const taskSchema = new Schema({
     },
     dueDate: {
         type: Date,
+        default: Date.now,
     }
 });
 
