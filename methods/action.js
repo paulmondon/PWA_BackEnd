@@ -492,6 +492,7 @@ var functions = {
     // Notification Push
     souscrire: async function (req, res) {
         try {
+          const subscription = req.body.subscription;
           webpush.setVapidDetails(
             'mailto:nico@gmail.com',
             'BOUfXxr7xEFzcjeXmvOFvbdsXosthzgbO5pyAUTWJ76XQ2fOLP0iau6ptvpdNyOVf-inaM3JIr9dXIE5f3oV3uE',
@@ -512,7 +513,7 @@ var functions = {
           };
       
           // Send a test notification to the subscribed user
-          webpush.sendNotification(req.body, JSON.stringify(payload));
+          webpush.sendNotification(subscription, JSON.stringify(payload));
       
           res.json({ success: true, message: 'Subscription successful', subscription: subscription });
         } catch (error) {
