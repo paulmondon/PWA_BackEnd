@@ -287,6 +287,21 @@ var functions = {
         }
     },
 
+    getProjectsByUser: function (req, res) {
+        const userId = req.params.id;
+    
+        Project.find({ users: userId })
+            .populate('users', 'username email')
+            .populate('tasks')
+            .exec()
+            .then(projects => {
+                res.json({ success: true, projects });
+            })
+            .catch(err => {
+                res.json({ success: false, message: err });
+            });
+    },
+
     getProjectById: async function (req, res) {
         const projectId = req.params.id;
 
