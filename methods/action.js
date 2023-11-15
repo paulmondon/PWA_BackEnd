@@ -517,7 +517,7 @@ var functions = {
           res.json({ success: true, message: 'Subscription successful', subscription: subscription });
         } catch (error) {
           console.error('Error handling push subscription:', error);
-          res.json({ success: false, message: 'Internal Server Error', error: error });
+          res.json({ success: false, message: 'Internal Server Error', error: error.message });
         }
       }
       
