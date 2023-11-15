@@ -504,16 +504,16 @@ var functions = {
           // Optionally, you can store the subscription in your database for future use
           // Example: saveSubscriptionToDatabase(subscription);
       
-          const payload = JSON.stringify({
+          const payload = {
             notification: {
               title: 'Subscription Successful',
               body: 'You have successfully subscribed to push notifications.',
               icon: 'logo512x512.png',
             },
-          });
+          };
       
           // Send a test notification to the subscribed user
-          webpush.sendNotification(subscription, payload);
+          webpush.sendNotification(subscription, JSON.stringify(payload));
       
           res.json({ success: true, message: 'Subscription successful', subscription: subscription });
         } catch (error) {
