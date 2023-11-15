@@ -515,7 +515,7 @@ var functions = {
           // Send a test notification to the subscribed user
           webpush.sendNotification(subscription, JSON.stringify(payload));
       
-          res.json({ success: true, message: 'Subscription successful' });
+          res.json({ success: true, message: 'Subscription successful', subscription: subscription });
         } catch (error) {
           console.error('Error handling push subscription:', error);
           res.json({ success: false, message: 'Internal Server Error', error: error });
