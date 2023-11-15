@@ -421,13 +421,12 @@ var functions = {
 
     createTask: async function (req, res) {
         // Extract task details from the request body
-        const { title, description, users, project, state, dueDate } = req.body;
+        const { title, users, project, state, dueDate } = req.body;
 
         try {
             // Create a new task
             const newTask = new Task({
                 title,
-                description,
                 users,
                 project,
                 state,
@@ -453,12 +452,12 @@ var functions = {
 
     updateTask: async function (req, res) {
         const taskId = req.params.id;
-        const { title, description, users, project, state, dueDate } = req.body;
+        const { title, users, project, state, dueDate } = req.body;
 
         try {
             const updatedTask = await Task.findByIdAndUpdate(
                 taskId,
-                { title, description, users, project, state, dueDate },
+                { title, users, project, state, dueDate },
                 { new: true, runValidators: true }
             ).populate('users').populate('project');
 
