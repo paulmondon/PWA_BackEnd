@@ -6,6 +6,7 @@ const Project = require('../models/project');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const { validationResult } = require('express-validator');
+const webpush = require('web-push');
 
 const generateToken = (userId) => {
     const secretKey = process.env.JWT_SECRET || 'default-secret-key';
