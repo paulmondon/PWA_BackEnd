@@ -54,7 +54,7 @@ app.post('/souscrire', (req, res) => {
         notification: {
             title: 'Ma notification d\'exemple',
             body: 'Voici le corps de ma notification',
-            icon: 'assets/icons/icon-384x384.png',
+            icon: 'assets/icons/logo512x512.png',
             actions: [
                 { action: 'bar', title: 'Action custom' },
                 { action: 'baz', title: 'Une autre action' },
