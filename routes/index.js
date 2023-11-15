@@ -17,7 +17,7 @@ router.post('/register', actions.register)
 
 // project routes
 router.get('/projects', actions.getAllProjects);
-router.get('projects/user/:id', actions.getProjectsByUser)
+router.get('/projects/user/:id', actions.getProjectsByUser)
 router.get('/projects/:id', actions.getProjectById);
 router.post('/projects', actions.createProject)
 router.put('/projects/:id', actions.editProject);
