@@ -508,7 +508,6 @@ var functions = {
             notification: {
               title: 'Subscription Successful',
               body: 'You have successfully subscribed to push notifications.',
-              icon: 'assets/icons/logo512x512.png',
             },
           };
       
