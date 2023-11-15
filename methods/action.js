@@ -27,7 +27,7 @@ var functions = {
     },
     getUsersExcept: function (req, res) {
         const userIdToExclude = req.params.id;
-    
+
         User.find({ _id: { $ne: userIdToExclude } })
             .exec()
             .then(users => {
@@ -36,7 +36,7 @@ var functions = {
             .catch(err => {
                 res.json({ success: false, message: err });
             });
-    },    
+    },
     getUser: async function (req, res) {
         const userId = req.params.id;
 
@@ -226,7 +226,7 @@ var functions = {
             // Check if the password is correct
             const isPasswordMatch = await bcrypt.compare(password, user.password);
             if (!isPasswordMatch) {
-                return res.json({ success: false, message: 'Invalid password'});
+                return res.json({ success: false, message: 'Invalid password' });
             }
 
             // Generate a JWT token
@@ -289,10 +289,20 @@ var functions = {
 
     getProjectsByUser: function (req, res) {
         const userId = req.params.id;
-    
+
         Project.find({ users: userId })
-            .populate('users')
-            .populate('tasks', populate('users'))
+            .populate({
+                path: 'users',
+                model: 'User',
+            })
+            .populate({
+                path: 'tasks',
+                model: 'Task',
+                populate: {
+                    path: 'users',
+                    model: 'User',
+                },
+            })
             .exec()
             .then(projects => {
                 res.json({ success: true, projects });
