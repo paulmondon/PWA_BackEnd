@@ -292,8 +292,7 @@ var functions = {
     
         Project.find({ users: userId })
             .populate('users')
-            .populate('tasks')
-            .populate('users')
+            .populate('tasks', populate('users'))
             .exec()
             .then(projects => {
                 res.json({ success: true, projects });
