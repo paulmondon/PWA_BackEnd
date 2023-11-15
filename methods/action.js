@@ -291,7 +291,7 @@ var functions = {
         const userId = req.params.id;
     
         Project.find({ users: userId })
-            .populate('users', 'username email')
+            .populate('users')
             .populate('tasks')
             .exec()
             .then(projects => {
