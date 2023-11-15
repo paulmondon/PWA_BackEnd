@@ -43,40 +43,6 @@ io.on('connection', (socket) => {
     // ... other event handlers
 });
 
-app.post('/souscrire', (req, res) => {
-    webpush.setVapidDetails(
-        'mailto:nico@gmail.com',
-        'BOUfXxr7xEFzcjeXmvOFvbdsXosthzgbO5pyAUTWJ76XQ2fOLP0iau6ptvpdNyOVf-inaM3JIr9dXIE5f3oV3uE',
-        'jfp4RXbjyCSbvb6d8elhfq0BzmaUQSLf-hCrL0NMRCA'
-      );
-    console.log('endpoint souscrire',req.body);
-    const payload = {
-        notification: {
-            title: 'Ma notification d\'exemple',
-            body: 'Voici le corps de ma notification',
-            icon: 'assets/icons/logo512x512.png',
-            actions: [
-                { action: 'bar', title: 'Action custom' },
-                { action: 'baz', title: 'Une autre action' },
-            ],
-            data: {
-                onActionClick: {
-                    default: { operation: 'openWindow',url: "http://localhost:3000/settings" },
-                    bar: {
-                        operation: 'focusLastFocusedOrOpen',
-                        url: '/signin',
-                    },
-                    baz: {
-                        operation: 'navigateLastFocusedOrOpen',
-                        url: '/signin',
-                    },
-                },
-            },
-        },
-    };
-      webpush.sendNotification(req.body, JSON.stringify(payload));
-});
-
 const port = process.env.PORT || 3000;
 app.listen(port, () => {
   console.log(`Server is running on port ${port}`);

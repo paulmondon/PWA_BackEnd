@@ -487,7 +487,37 @@ var functions = {
             console.error('Error deleting task:', error);
             res.json({ success: false, message: 'Internal server error' });
         }
-    }
+    },
+
+    // Notification Push
+    souscrire: async function (req, res) {
+        try {
+          const subscription = req.body.subscription;
+      
+          // Save the subscription details to your database or perform other necessary actions
+          console.log('Received subscription:', subscription);
+      
+          // Optionally, you can store the subscription in your database for future use
+          // Example: saveSubscriptionToDatabase(subscription);
+      
+          const payload = {
+            notification: {
+              title: 'Subscription Successful',
+              body: 'You have successfully subscribed to push notifications.',
+              icon: 'assets/icons/logo512x512.png',
+            },
+          };
+      
+          // Send a test notification to the subscribed user
+          webpush.sendNotification(subscription, JSON.stringify(payload));
+      
+          res.status(200).json({ success: true, message: 'Subscription successful' });
+        } catch (error) {
+          console.error('Error handling push subscription:', error);
+          res.status(500).json({ success: false, message: 'Internal Server Error' });
+        }
+      }
+      
 
 }
 
