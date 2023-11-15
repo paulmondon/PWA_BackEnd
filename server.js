@@ -61,7 +61,7 @@ app.post('/souscrire', (req, res) => {
             ],
             data: {
                 onActionClick: {
-                    default: { operation: 'openWindow',url: "http://localhost:4200/notifications" },
+                    default: { operation: 'openWindow',url: "http://localhost:3000/settings" },
                     bar: {
                         operation: 'focusLastFocusedOrOpen',
                         url: '/signin',
@@ -75,9 +75,6 @@ app.post('/souscrire', (req, res) => {
         },
     };
       webpush.sendNotification(req.body, JSON.stringify(payload));
-
-
-
 });
 
 const port = process.env.PORT || 3000;
