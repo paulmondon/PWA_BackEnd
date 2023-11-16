@@ -502,7 +502,7 @@ var functions = {
                 'jfp4RXbjyCSbvb6d8elhfq0BzmaUQSLf-hCrL0NMRCA'
             );
 
-            await User.findByIdAndUpdate(userId, { subscription: subscription });
+            await User.findByIdAndUpdate(userId, { subscription: subscription, notification: true });
 
             const payload = {
                 notification: {
@@ -528,7 +528,7 @@ var functions = {
 
             const user = await User.findById(userId);
 
-            if (!user || !user.subscription) {
+            if (!user || !user.subscription || !user.notification) {
                 return res.json({ success: false, message: 'User not found or no subscription available' });
             }
 
