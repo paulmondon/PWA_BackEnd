@@ -493,34 +493,68 @@ var functions = {
     // Notification Push
     subscribe: async function (req, res) {
         try {
-        const userId = req.params.id;
-          const subscription = req.body.subscription;
-          
-          webpush.setVapidDetails(
-            'mailto:nico@gmail.com',
-            'BOUfXxr7xEFzcjeXmvOFvbdsXosthzgbO5pyAUTWJ76XQ2fOLP0iau6ptvpdNyOVf-inaM3JIr9dXIE5f3oV3uE',
-            'jfp4RXbjyCSbvb6d8elhfq0BzmaUQSLf-hCrL0NMRCA'
-          );
+            const userId = req.params.id;
+            const subscription = req.body.subscription;
 
-          await User.findByIdAndUpdate(userId, { subscription: subscription });
-      
-          const payload = {
-            notification: {
-              title: 'Subscription Successful',
-              body: 'You have successfully subscribed to push notifications.',
-              icon: 'logo512x512.png',
-            },
-          };
-      
-          webpush.sendNotification(subscription, JSON.stringify(payload));
-      
-          res.json({ success: true, message: 'Subscription successful' });
+            webpush.setVapidDetails(
+                'mailto:nico@gmail.com',
+                'BOUfXxr7xEFzcjeXmvOFvbdsXosthzgbO5pyAUTWJ76XQ2fOLP0iau6ptvpdNyOVf-inaM3JIr9dXIE5f3oV3uE',
+                'jfp4RXbjyCSbvb6d8elhfq0BzmaUQSLf-hCrL0NMRCA'
+            );
+
+            await User.findByIdAndUpdate(userId, { subscription: subscription });
+
+            const payload = {
+                notification: {
+                    title: 'Subscription Successful',
+                    body: 'You have successfully subscribed to push notifications.',
+                    icon: 'logo512x512.png',
+                },
+            };
+
+            webpush.sendNotification(subscription, JSON.stringify(payload));
+
+            res.json({ success: true, message: 'Subscription successful' });
         } catch (error) {
-          console.error('Error handling push subscription:', error);
-          res.json({ success: false, message: 'Internal Server Error', error: error.message });
+            console.error('Error handling push subscription:', error);
+            res.json({ success: false, message: 'Internal Server Error', error: error.message });
         }
-      }
-      
+    },
+
+    notify: async function (req, res) {
+        try {
+            const userId = req.params.id;
+            const { title, body, redirectUrl  } = req.body;
+
+            const user = await User.findById(userId);
+
+            if (!user || !user.subscription) {
+                return res.json({ success: false, message: 'User not found or no subscription available' });
+            }
+
+            webpush.setVapidDetails(
+                'mailto:nico@gmail.com',
+                'BOUfXxr7xEFzcjeXmvOFvbdsXosthzgbO5pyAUTWJ76XQ2fOLP0iau6ptvpdNyOVf-inaM3JIr9dXIE5f3oV3uE',
+                'jfp4RXbjyCSbvb6d8elhfq0BzmaUQSLf-hCrL0NMRCA'
+            );
+
+            const payload = {
+                notification: {
+                    title: title,
+                    body: body,
+                    icon: 'logo512x512.png',
+                    data: { redirectUrl: redirectUrl },
+                },
+            };
+
+            webpush.sendNotification(user.subscription, JSON.stringify(payload));
+
+            res.json({ success: true, message: 'Notification sent successfully' });
+        } catch (error) {
+            console.error('Error sending notification:', error);
+            res.json({ success: false, message: 'Internal Server Error', error: error.message });
+        }
+    }
 
 }
 

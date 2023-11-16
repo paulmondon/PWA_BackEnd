@@ -30,6 +30,9 @@ router.post('/tasks', actions.createTask);
 router.put('/tasks/:id', actions.updateTask);
 router.delete('/tasks/:id', actions.deleteTask);
 
+// push notifications
+
 router.post('/subscribe/:id', actions.subscribe)
+router.post('/notify/:id', actions.notify)
 
 module.exports = router
