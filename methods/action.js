@@ -493,7 +493,9 @@ var functions = {
     // Notification Push
     subscribe: async function (req, res) {
         try {
+        const userId = req.params.id;
           const subscription = req.body.subscription;
+          
           webpush.setVapidDetails(
             'mailto:nico@gmail.com',
             'BOUfXxr7xEFzcjeXmvOFvbdsXosthzgbO5pyAUTWJ76XQ2fOLP0iau6ptvpdNyOVf-inaM3JIr9dXIE5f3oV3uE',
