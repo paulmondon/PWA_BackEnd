@@ -34,5 +34,6 @@ router.delete('/tasks/:id', actions.deleteTask);
 
 router.post('/subscribe/:id', actions.subscribe)
 router.post('/notify/:id', actions.notify)
+router.post('/notifyUsers', actions.notifyUsers)
 
 module.exports = router

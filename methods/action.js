@@ -524,7 +524,7 @@ var functions = {
     notify: async function (req, res) {
         try {
             const userId = req.params.id;
-            const { title, body, redirectUrl  } = req.body;
+            const { title, body, redirectUrl } = req.body;
 
             const user = await User.findById(userId);
 
@@ -552,6 +552,56 @@ var functions = {
             res.json({ success: true, message: 'Notification sent successfully' });
         } catch (error) {
             console.error('Error sending notification:', error);
+            res.json({ success: false, message: 'Internal Server Error', error: error.message });
+        }
+    },
+
+
+
+    notifyUsers: async function (req, res) {
+        try {
+            const userIds = req.body.users; // Assuming users is an array of user IDs
+            const { title, body, redirectUrl } = req.body;
+
+            // Check if user IDs were provided
+            if (!userIds || userIds.length === 0) {
+                return res.json({ success: false, message: 'No user IDs provided' });
+            }
+
+            webpush.setVapidDetails(
+                'mailto:nico@gmail.com',
+                'BOUfXxr7xEFzcjeXmvOFvbdsXosthzgbO5pyAUTWJ76XQ2fOLP0iau6ptvpdNyOVf-inaM3JIr9dXIE5f3oV3uE',
+                'jfp4RXbjyCSbvb6d8elhfq0BzmaUQSLf-hCrL0NMRCA'
+            );
+
+            // Fetch users and send notifications
+            const notificationPromises = userIds.map(async (userId) => {
+                try {
+                    const user = await User.findById(userId);
+
+                    if (user && user.subscription && user.notification) {
+                        const payload = {
+                            notification: {
+                                title: title,
+                                body: body,
+                                icon: 'logo512x512.png',
+                                data: { redirectUrl: redirectUrl },
+                            },
+                        };
+
+                        await webpush.sendNotification(user.subscription, JSON.stringify(payload));
+                    }
+                } catch (error) {
+                    console.error(`Error sending notification to user ${userId}:`, error);
+                }
+            });
+
+            // Wait for all notifications to be sent
+            await Promise.all(notificationPromises);
+
+            res.json({ success: true, message: 'Notifications sent successfully' });
+        } catch (error) {
+            console.error('Error sending notifications:', error);
             res.json({ success: false, message: 'Internal Server Error', error: error.message });
         }
     }
