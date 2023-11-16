@@ -491,7 +491,7 @@ var functions = {
     },
 
     // Notification Push
-    souscrire: async function (req, res) {
+    subscribe: async function (req, res) {
         try {
           const subscription = req.body.subscription;
           webpush.setVapidDetails(
@@ -499,10 +499,8 @@ var functions = {
             'BOUfXxr7xEFzcjeXmvOFvbdsXosthzgbO5pyAUTWJ76XQ2fOLP0iau6ptvpdNyOVf-inaM3JIr9dXIE5f3oV3uE',
             'jfp4RXbjyCSbvb6d8elhfq0BzmaUQSLf-hCrL0NMRCA'
           );
-          // Save the subscription details to your database or perform other necessary actions
-      
-          // Optionally, you can store the subscription in your database for future use
-          // Example: saveSubscriptionToDatabase(subscription);
+
+          await User.findByIdAndUpdate(userId, { subscription: subscription });
       
           const payload = {
             notification: {
@@ -512,10 +510,9 @@ var functions = {
             },
           };
       
-          // Send a test notification to the subscribed user
           webpush.sendNotification(subscription, JSON.stringify(payload));
       
-          res.json({ success: true, message: 'Subscription successful', subscription: subscription });
+          res.json({ success: true, message: 'Subscription successful' });
         } catch (error) {
           console.error('Error handling push subscription:', error);
           res.json({ success: false, message: 'Internal Server Error', error: error.message });

@@ -29,6 +29,31 @@ const userSchema = new Schema({
         type: String,
         default: false,
     },
+    subscription: {
+        type: Object,
+        properties: {
+            endpoint: {
+                type: String,
+            },
+            expirationTime: {
+                type: Number,
+                nullable: true,
+            },
+            keys: {
+                type: Object,
+                properties: {
+                    p256dh: {
+                        type: String,
+                    },
+                    auth: {
+                        type: String,
+                    },
+                },
+                required: ['p256dh', 'auth'],
+            },
+        },
+        required: ['endpoint', 'keys'],
+    },
     notification: {
         type: Boolean,
         default: false

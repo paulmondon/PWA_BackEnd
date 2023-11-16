@@ -30,6 +30,6 @@ router.post('/tasks', actions.createTask);
 router.put('/tasks/:id', actions.updateTask);
 router.delete('/tasks/:id', actions.deleteTask);
 
-router.post('/souscrire', actions.souscrire)
+router.post('/subscribe', actions.subscribe)
 
 module.exports = router
