@@ -14,15 +14,13 @@ const app = express();
 const server = http.createServer(app);
 const io = socketIo(server);
 //mise en place du CORS
-const corsOptions = {
-  origin: 'https://front-pwa-eight.vercel.app',
-  methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
-  credentials: true,  // enable set cookie
-  optionsSuccessStatus: 204,
-};
-
-app.use(cors(corsOptions));
-
+// const corsOptions = {
+//     origin: 'https://front-pwa-eight.vercel.app',
+//     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+//     credentials: true,  // enable set cookie
+//     optionsSuccessStatus: 204,
+//   };
+app.use(cors());
 
 //Recuperation facile des parametres POST
 app.use(bodyParser.urlencoded({ extended: false }));
