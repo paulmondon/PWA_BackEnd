@@ -110,16 +110,36 @@ var functions = {
 
         try {
             // Find the user by ID
-            const user = await User.findByIdAndUpdate(
-                userId,
-                { username, email, newPassword, confirmPassword, notification },
-                { new: true, runValidators: true }
-            )
+            const user = await User.findById(userId);
             if (!user) {
                 return res.json({ success: false, message: 'User not found' });
             }
 
+            // Update user fields if provided
+            if (username) {
+                user.username = username;
+            }
+            if (email) {
+                user.email = email;
+            }
+            if (notification) {
+                user.notification = notification;
+            }
+            if (newPassword) {
+                if (newPassword !== confirmPassword) {
+                    return res.json({ success: false, message: 'Password and confirmPassword do not match' });
+                }
+                // Hash the new password before saving
+                const salt = await bcrypt.genSalt(10);
+
+                // Hash the new password with the generated salt
+                const hashedPassword = await bcrypt.hash(newPassword, salt);
+                user.password = hashedPassword;
+            }
+
             // Save the updated user to the database
+            const updatedUser = await user.save();
+
             return res.json({ success: true, message: 'User updated successfully', user: updatedUser });
         } catch (error) {
             console.error('Error updating user:', error);
