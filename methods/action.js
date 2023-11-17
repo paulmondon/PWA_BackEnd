@@ -589,11 +589,6 @@ var functions = {
                             },
                         };
 
-                        if (!document.hidden) {
-                            console.log(`User ${userId} is currently active on the page. Skipping notification.`);
-                            return;
-                        }
-
                         await webpush.sendNotification(user.subscription, JSON.stringify(payload));
                     }
                 } catch (error) {
