@@ -107,14 +107,30 @@ var functions = {
     updateUser: async function (req, res) {
         const userId = req.params.id;
         const { username, email, newPassword, confirmPassword, notification } = req.body;
-
+    
         try {
             // Find the user by ID
             const user = await User.findById(userId);
             if (!user) {
                 return res.json({ success: false, message: 'User not found' });
             }
-
+    
+            // Check if the provided username is already in use by another user
+            if (username && username !== user.username) {
+                const existingUsername = await User.findOne({ username });
+                if (existingUsername) {
+                    return res.json({ success: false, message: 'Username already in use' });
+                }
+            }
+    
+            // Check if the provided email is already in use by another user
+            if (email && email !== user.email) {
+                const existingEmail = await User.findOne({ email });
+                if (existingEmail) {
+                    return res.json({ success: false, message: 'Email already in use' });
+                }
+            }
+    
             // Update user fields if provided
             if (username) {
                 user.username = username;
@@ -131,21 +147,21 @@ var functions = {
                 }
                 // Hash the new password before saving
                 const salt = await bcrypt.genSalt(10);
-
+    
                 // Hash the new password with the generated salt
                 const hashedPassword = await bcrypt.hash(newPassword, salt);
                 user.password = hashedPassword;
             }
-
+    
             // Save the updated user to the database
             const updatedUser = await user.save();
-
+    
             return res.json({ success: true, message: 'User updated successfully', user: updatedUser });
         } catch (error) {
             console.error('Error updating user:', error);
             return res.json({ success: false, message: 'Internal server error' });
         }
-    },
+    },    
 
     deleteUser: async function (req, res) {
         try {
