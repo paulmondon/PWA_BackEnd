@@ -496,23 +496,7 @@ var functions = {
             const userId = req.params.id;
             const subscription = req.body.subscription;
 
-            webpush.setVapidDetails(
-                'mailto:nico@gmail.com',
-                'BOUfXxr7xEFzcjeXmvOFvbdsXosthzgbO5pyAUTWJ76XQ2fOLP0iau6ptvpdNyOVf-inaM3JIr9dXIE5f3oV3uE',
-                'jfp4RXbjyCSbvb6d8elhfq0BzmaUQSLf-hCrL0NMRCA'
-            );
-
             await User.findByIdAndUpdate(userId, { subscription: subscription, notification: true });
-
-            const payload = {
-                notification: {
-                    title: 'Subscription Successful',
-                    body: 'You have successfully subscribed to push notifications.',
-                    icon: 'logo512x512.png',
-                },
-            };
-
-            webpush.sendNotification(subscription, JSON.stringify(payload));
 
             res.json({ success: true, message: 'Subscription successful' });
         } catch (error) {
