@@ -49,10 +49,10 @@ const userSchema = new Schema({
                         type: String,
                     },
                 },
-                required: ['p256dh', 'auth'],
+                // required: ['p256dh', 'auth'],
             },
         },
-        required: ['endpoint', 'keys'],
+        // required: ['endpoint', 'keys'],
     },
     notification: {
         type: Boolean,
